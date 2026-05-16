@@ -13,7 +13,19 @@ const stores: StoresMap = new Map();
 
 export const isServer = typeof window === 'undefined';
 
-export const useStore = <T extends object, H = any>(params: UseStoreParams<T, H> = {}) => {
+type ExtendProps<K extends string, T, H> = string extends K
+  ? {}
+  : {
+  [P in `${K}Handlers`]: H | undefined;
+} & {
+  [P in `use${Capitalize<K>}Selector`]: <S>(selector: (state: T) => S) => S;
+} & {
+  [P in `get${Capitalize<K>}State`]: () => T;
+};
+
+export const useStore = <T extends object, H = any, K extends string = string>(
+  params: UseStoreParams<T, H, K> = {}
+) => {
   const { initialState = {} as T, storeKey, isWithState, prefixKey } = params;
   const { handlers: handlersFn } = params;
 
@@ -94,15 +106,15 @@ export const useStore = <T extends object, H = any>(params: UseStoreParams<T, H>
   }, [prefixKey]);
 
   if (key) {
-    (storeProps as any)[`${key}Handlers`] = handlers;
+    (storeProps as unknown as Record<string, unknown>)[`${key}Handlers`] = storeProps.handlers;
   }
 
   if (prefix) {
-    (storeProps as any)[`use${prefix}Selector`] = useStoreSelector;
-    (storeProps as any)[`get${prefix}State`] = store.getState;
+    (storeProps as unknown as Record<string, unknown>)[`use${prefix}Selector`] = useStoreSelector;
+    (storeProps as unknown as Record<string, unknown>)[`get${prefix}State`] = store.getState;
   }
 
-  return storeProps
+  return storeProps as typeof storeProps & ExtendProps<K, T, H>
 }
 
 export default useStore

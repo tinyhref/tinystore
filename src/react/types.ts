@@ -1,6 +1,6 @@
 import type { Handlers } from '../types';
 
-export interface UseStoreParams<T, H = any, K extends string = string> {
+export interface UseStoreParams<T, H = {}, K extends string = string> {
   storeKey?: string;
   initialState?: T;
   isWithState?: boolean;

@@ -25,7 +25,7 @@ type ExtendProps<K extends string, T, H> = string extends K
   [P in `set${Capitalize<K>}State`]: Store<T, H>['setState'];
 };
 
-export const useStore = <T extends object, H = any, K extends string = string>(
+export const useStore = <T extends object, H = {}, K extends string = string>(
   params: UseStoreParams<T, H, K> = {}
 ) => {
   const { initialState = {} as T, storeKey, isWithState, prefixKey } = params;

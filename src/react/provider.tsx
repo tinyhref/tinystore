@@ -7,20 +7,20 @@ import React, {
 import type { UseStoreParams } from './types';
 import useStore from './useStore';
 
-export type StoreMethods<T extends object, H = any> = ReturnType<typeof useStore<T, H>>;
+export type StoreMethods<T extends object, H = {}> = ReturnType<typeof useStore<T, H>>;
 
 export interface StoreContextValue<T extends object, H> {
   storeMethods: StoreMethods<T, H>;
 }
 
-export interface StoreProviderProps<T extends object, H = any> extends UseStoreParams<T, H> {
+export interface StoreProviderProps<T extends object, H = {}> extends UseStoreParams<T, H> {
   children?: ReactNode;
   // storeRef?: RefObject<StoreMethods<T>>
 }
 
 export const StoreContext = createContext<StoreContextValue<any, any> | undefined>(undefined);
 
-export const StoreProvider = <T extends object, H = any>({
+export const StoreProvider = <T extends object, H = {}>({
   storeKey,
   initialState,
   children,
@@ -41,7 +41,7 @@ export const StoreProvider = <T extends object, H = any>({
   );
 };
 
-export const useStoreContext = <T extends object, H = any>() => {
+export const useStoreContext = <T extends object, H = {}>() => {
   const context = useContext(StoreContext);
   if (!context) {
     throw new Error('useStoreContext must be used within a StoreProvider');

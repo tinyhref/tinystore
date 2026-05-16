@@ -16,11 +16,13 @@ export const isServer = typeof window === 'undefined';
 type ExtendProps<K extends string, T, H> = string extends K
   ? {}
   : {
-  [P in `${K}Handlers`]: H | undefined;
+  [P in `${K}Handlers`]: (H & { updateState: Store<T, H>['setState'] }) | undefined;
 } & {
   [P in `use${Capitalize<K>}Selector`]: <S>(selector: (state: T) => S) => S;
 } & {
   [P in `get${Capitalize<K>}State`]: () => T;
+} & {
+  [P in `set${Capitalize<K>}State`]: Store<T, H>['setState'];
 };
 
 export const useStore = <T extends object, H = any, K extends string = string>(
@@ -67,8 +69,10 @@ export const useStore = <T extends object, H = any, K extends string = string>(
   let handlers: H | undefined;
 
   if (typeof handlersFn === 'function') {
-    const state = store.getState();
-    handlers = handlersFn({ state, setState: store.setState });
+    handlers = handlersFn({
+      setState: store.setState,
+      getState: store.getState
+    });
   } else {
     handlers = handlersFn
   }
@@ -76,9 +80,10 @@ export const useStore = <T extends object, H = any, K extends string = string>(
   const storeProps = {
     ...store,
     handlers: {
+      updateState: store.setState,
       ...store.handlers,
       ...handlers,
-    } as H,
+    } as H & { updateState: Store<T, H>['setState'] },
     useStoreSelector,
     destroy: () => {
       storeRef.current = null;
@@ -112,6 +117,7 @@ export const useStore = <T extends object, H = any, K extends string = string>(
   if (prefix) {
     (storeProps as unknown as Record<string, unknown>)[`use${prefix}Selector`] = useStoreSelector;
     (storeProps as unknown as Record<string, unknown>)[`get${prefix}State`] = store.getState;
+    (storeProps as unknown as Record<string, unknown>)[`set${prefix}State`] = store.setState;
   }
 
   return storeProps as typeof storeProps & ExtendProps<K, T, H>

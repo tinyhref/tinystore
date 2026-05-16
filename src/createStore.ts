@@ -22,13 +22,18 @@ export const createStore = <T extends object, H>(initialState: T, handlersFn?: H
     }
   };
 
+  const getState = () => state;
+
   let handlers: H | undefined;
   if (typeof handlersFn === 'function') {
-    handlers = handlersFn({ state, setState });
+    handlers = handlersFn({
+      getState,
+      setState
+    });
   }
 
   return {
-    getState: () => state,
+    getState,
     setState,
     subscribe: (listener) => {
       listeners.add(listener);

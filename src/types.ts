@@ -1,6 +1,9 @@
 export type Listener<T> = (state: T, prevState: T) => void;
 
-export type Handlers<T, H = any> = (store: { state: T; setState: Store<T, H>['setState'] }) => H;
+export type Handlers<T, H = any> = (store: {
+  setState: Store<T, H>['setState'],
+  getState: Store<T, H>['getState']
+}) => H;
 
 export interface Store<T, H> {
   getState: () => T;

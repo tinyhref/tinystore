@@ -34,7 +34,7 @@ export const useStore = <T extends object, H = any>(params: UseStoreParams<T, H>
     }
 
     if (!storeRef.current) {
-      storeRef.current = createStore(initialState, handlers);
+      storeRef.current = createStore<T, H>(initialState, handlers);
     }
 
     if (!storeKey || isServer) {
@@ -63,18 +63,18 @@ export const useStore = <T extends object, H = any>(params: UseStoreParams<T, H>
 
   const storeProps = {
     ...store,
+    handlers: {
+      ...store.handlers,
+      ...handlers,
+    } as H,
     useStoreSelector,
     destroy: () => {
       storeRef.current = null;
       if (storeKey) {
         stores.delete(storeKey);
       }
-    },
-  } as const;
-
-  if (handlers) {
-    (storeProps as any).handlers = handlers;
-  }
+    }
+  };
 
   if (isWithState) {
     (storeProps as any).state = useSyncExternalStore(store.subscribe, store.getState, store.getState);
